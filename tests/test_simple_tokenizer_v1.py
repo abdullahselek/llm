@@ -25,6 +25,15 @@ def test_SimpleTokenizerV1_encode(tokenizerv1: SimpleTokenizerV1):
     assert len(ids) == 9
 
 
+def test_SimpleTokenizerV1_encode_when_text_contains_unknown_words(
+    tokenizerv1: SimpleTokenizerV1,
+):
+    """Test encode function of SimpleTokenizerV1."""
+    ids = tokenizerv1.encode("Hello, this is a test text.")
+
+    assert len(ids) == 8
+
+
 def test_SimpleTokenizerV1_decode(tokenizerv1: SimpleTokenizerV1):
     """Test decode function of SimpleTokenizerV1."""
     original_text = "It was not till three years later that."
