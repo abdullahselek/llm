@@ -41,3 +41,17 @@ def test_SimpleTokenizerV1_decode(tokenizerv1: SimpleTokenizerV1):
     text = tokenizerv1.decode(ids=ids)
 
     assert text == original_text
+
+
+def test_SimpleTokenizerV1_encode_with_uknown_words_then_decode(
+    tokenizerv1: SimpleTokenizerV1,
+):
+    """Test encode and decode with special character."""
+    text1 = "Hello world!"
+    text2 = "This is a Python unit test."
+    text = " <|endoftext|> ".join([text1, text2])
+
+    ids = tokenizerv1.encode(text)
+    output = tokenizerv1.decode(ids)
+
+    assert output == "<|unk|> <|unk|>! <|endoftext|> This is a <|unk|> <|unk|> <|unk|>."
