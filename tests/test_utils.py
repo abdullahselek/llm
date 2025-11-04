@@ -7,4 +7,4 @@ def test_create_vocab():
     """Test function that creates vocablary."""
     vocab = create_vocab()
 
-    assert len(vocab) == 1130
+    assert len(vocab) == 1132

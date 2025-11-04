@@ -19,6 +19,7 @@ def create_vocab() -> dict:
     preprocessed = [item.strip() for item in preprocessed if item.strip()]
 
     all_words = sorted(set(preprocessed))
+    all_words.extend(["<|endoftext|>", "<|unk|>"])
     vocab = {token: integer for integer, token in enumerate(all_words)}
 
     return vocab
