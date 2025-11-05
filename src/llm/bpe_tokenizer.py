@@ -1,0 +1,36 @@
+"""BytePair Encoder used by GPT-2."""
+
+import tiktoken
+
+
+class BPETokenizer:
+    """BytePair Tokenizer."""
+
+    def __init__(self):
+        """Initialize."""
+        self.tokenizer = tiktoken.get_encoding("gpt2")
+
+    def encode(self, text: str) -> list[int]:
+        """Encode given text and return tokens.
+
+        Args:
+            text (str): String to be encoded.
+
+        Returns:
+            List of ids.
+
+        """
+        ids = self.tokenizer.encode(text, allowed_special={"<|endoftext|>"})
+        return ids
+
+    def decode(self, ids: list[int]) -> str:
+        """Decode given ids.
+
+        Args:
+            ids (list[int]): List of ids.
+
+        Returns:
+            Decoded string.
+
+        """
+        return self.tokenizer.decode(ids)

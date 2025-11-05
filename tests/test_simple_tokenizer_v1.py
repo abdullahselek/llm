@@ -3,13 +3,6 @@
 import pytest
 
 from llm.simple_tokenizer_v1 import SimpleTokenizerV1
-from llm.utils import create_vocab
-
-
-@pytest.fixture()
-def vocab() -> dict:
-    """Vocablary dict."""
-    return create_vocab()
 
 
 @pytest.fixture()
