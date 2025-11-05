@@ -32,3 +32,15 @@ def test_BPETokenizer_decode(bpe_tokenizer: BPETokenizer):
     output = bpe_tokenizer.decode(ids)
 
     assert output == text
+
+
+def test_BPETokenizer_encode_with_uknown_words_then_decode(bpe_tokenizer: BPETokenizer):
+    """Test encode and decode with special character."""
+    text1 = "Hello world!"
+    text2 = "This is a Python unit test."
+    text = " <|endoftext|> ".join([text1, text2])
+
+    ids = bpe_tokenizer.encode(text)
+    output = bpe_tokenizer.decode(ids)
+
+    assert output == "Hello world! <|endoftext|> This is a Python unit test."
