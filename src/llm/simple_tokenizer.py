@@ -6,7 +6,7 @@ ENCODE_PATTERN = r'([,.:;?_!"()\']|--|\s)'
 DECODE_PATTERN = r'\s+([,.?!"()\'])'
 
 
-class SimpleTokenizerV1:
+class SimpleTokenizer:
     """SimpleTokenizer that uses regular experession."""
 
     def __init__(self, vocab: dict):
