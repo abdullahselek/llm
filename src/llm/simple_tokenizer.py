@@ -1,4 +1,4 @@
-"""Simple Tokenizer V1 that uses Regex."""
+"""Simple Tokenizer that uses Regex."""
 
 import re
 
