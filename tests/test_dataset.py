@@ -1,7 +1,7 @@
 """Tests for dataset module."""
 
 from llm.bpe_tokenizer import BPETokenizer
-from llm.dataset import GPTDataset, create_gpt_dataloader
+from llm.dataset import GPTDataset, create_dataloader
 
 
 def test_GPTDataset_loading_items(vocab_text: str):
@@ -21,9 +21,9 @@ def test_GPTDataset_getitem_at_index(vocab_text: str):
     assert len(item) == 2
 
 
-def test_create_gpt_dataloader(vocab_text: str):
+def test_create_dataloader(vocab_text: str):
     """Test creating GPT data loader with raw text."""
-    data_loader = create_gpt_dataloader(vocab_text, batch_size=4, max_length=256, stride=128)
+    data_loader = create_dataloader(vocab_text, batch_size=4, max_length=256, stride=128)
     data_iter = iter(data_loader)
     first_batch = next(data_iter)
 

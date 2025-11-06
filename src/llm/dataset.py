@@ -42,7 +42,7 @@ class GPTDataset(Dataset):
         return self.input_ids[idx], self.target_ids[idx]
 
 
-def create_gpt_dataloader(
+def create_dataloader(
     text: str,
     batch_size: int = 4,
     max_length: int = 256,
