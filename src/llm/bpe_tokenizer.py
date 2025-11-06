@@ -4,7 +4,7 @@ import tiktoken
 
 
 class BPETokenizer:
-    """BytePair Tokenizer."""
+    """BytePair Tokenizer. tiktoken package is preffered to get performance of Rust."""
 
     def __init__(self):
         """Initialize."""
