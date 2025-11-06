@@ -1,3 +1,20 @@
 # LLM from scratch
 
-This repo implements an LLM from scratch.
+Designing and building a Large Language Model from scratch, in progress.
+
+## Requirements
+
+- Python 3.13
+- [uv](https://docs.astral.sh/uv/)
+
+## Setting up development environment
+
+After installing uv package and project manager, run the command below to create virtual environment and install all dependencies.
+
+```bash
+uv sync
+```
+
+## Developer Tasks Automation
+
+This project uses [Nox](https://nox.thea.codes/en/stable/) for implementing and running dev automation tasks such as linting, formatting code and running tests etc. Current tasks are available in [noxfile.py](https://github.com/abdullahselek/llm/blob/main/noxfile.py).
