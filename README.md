@@ -18,3 +18,9 @@ uv sync
 ## Developer Tasks Automation
 
 This project uses [Nox](https://nox.thea.codes/en/stable/) for implementing and running dev automation tasks such as linting, formatting code and running tests etc. Current tasks are available in [noxfile.py](https://github.com/abdullahselek/llm/blob/main/noxfile.py).
+
+Task that runs the unit tests:
+
+```bash
+uv run nox -s run_tests
+```
