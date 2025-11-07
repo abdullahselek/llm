@@ -13,17 +13,10 @@ def bpe_tokenizer() -> BPETokenizer:
     return BPETokenizer()
 
 
-def test_SelfAttention_compute_attention_weights(bpe_tokenizer: BPETokenizer):
+def test_SelfAttention_compute_attention_weights(
+    token_ids: list[int], token_embeddings: torch.Tensor
+):
     """Test attention weights computed by SelfAttention."""
-    token_ids = bpe_tokenizer.encode(text="Designing and implementing an LLM.")
-    print(f"token_ids: {len(token_ids)}")
-
-    vocab_size = max(token_ids) + 1
-    embedding_dim = 3
-    embedding_layer = torch.nn.Embedding(vocab_size, embedding_dim)
-
-    token_embeddings = embedding_layer(torch.tensor(token_ids))
-
     assert token_embeddings[0].shape == torch.Size([3])
 
     input_dim = token_embeddings.shape[1]

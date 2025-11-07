@@ -3,7 +3,9 @@
 from pathlib import Path
 
 import pytest
+import torch
 
+from llm.bpe_tokenizer import BPETokenizer
 from llm.utils import create_vocab
 
 
@@ -20,3 +22,27 @@ def vocab_text() -> str:
     with open(str(file_path), encoding="utf-8") as f:
         text = f.read()
     return text
+
+
+@pytest.fixture()
+def bpe_tokenizer() -> BPETokenizer:
+    """BPETokenizer fixture."""
+    return BPETokenizer()
+
+
+@pytest.fixture()
+def token_ids(bpe_tokenizer: BPETokenizer) -> list[int]:
+    """Fixture of token ids."""
+    token_ids = bpe_tokenizer.encode(text="Designing and implementing an LLM.")
+    return token_ids
+
+
+@pytest.fixture()
+def token_embeddings(token_ids: list[int]) -> torch.Tensor:
+    """Fixture of token emmbeddings."""
+    vocab_size = max(token_ids) + 1
+    embedding_dim = 3
+    embedding_layer = torch.nn.Embedding(vocab_size, embedding_dim)
+
+    token_embeddings = embedding_layer(torch.tensor(token_ids))
+    return token_embeddings
