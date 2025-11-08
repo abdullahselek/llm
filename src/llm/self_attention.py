@@ -1,6 +1,7 @@
 """Self Attention Layer."""
 
 import torch
+import torch.nn as nn
 
 
 class SelfAttention(torch.nn.Module):
@@ -23,9 +24,9 @@ class SelfAttention(torch.nn.Module):
 
         """
         super().__init__()
-        self.W_query = torch.nn.Linear(input_dim, output_dim, bias=qkv_bias)
-        self.W_key = torch.nn.Linear(input_dim, output_dim, bias=qkv_bias)
-        self.W_value = torch.nn.Linear(input_dim, output_dim, bias=qkv_bias)
+        self.W_query = nn.Linear(input_dim, output_dim, bias=qkv_bias)
+        self.W_key = nn.Linear(input_dim, output_dim, bias=qkv_bias)
+        self.W_value = nn.Linear(input_dim, output_dim, bias=qkv_bias)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Compute the self attention mechanism.

@@ -4,6 +4,7 @@ import logging
 import sys
 
 import torch
+import torch.nn as nn
 
 from llm.dataset import create_dataloader
 
@@ -39,8 +40,8 @@ def get_input_embeddings(
     vocab_size = 50257
     log.info(f"Vocablary size: {vocab_size}")
 
-    token_embedding_layer = torch.nn.Embedding(vocab_size, output_dim)
-    pos_embedding_layer = torch.nn.Embedding(context_length, output_dim)
+    token_embedding_layer = nn.Embedding(vocab_size, output_dim)
+    pos_embedding_layer = nn.Embedding(context_length, output_dim)
 
     dataloader = create_dataloader(
         text,
