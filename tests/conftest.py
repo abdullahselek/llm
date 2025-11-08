@@ -46,3 +46,10 @@ def token_embeddings(token_ids: list[int]) -> torch.Tensor:
 
     token_embeddings = embedding_layer(torch.tensor(token_ids))
     return token_embeddings
+
+
+@pytest.fixture()
+def batch_embeddings(token_embeddings: torch.Tensor) -> torch.Tensor:
+    """Fixture of batch token embeddings."""
+    batch = torch.stack((token_embeddings, token_embeddings), dim=0)
+    return batch
