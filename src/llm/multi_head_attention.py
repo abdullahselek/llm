@@ -3,15 +3,13 @@
 import torch
 import torch.nn as nn
 
-from llm.causal_attention import CausalAttention
-
 
 class MultiHeadAttention(nn.Module):
     """MultiHeadAttention layer for transformer architectures.
 
-    This module implements MultiHead CausalAttention mechanism where the input is
-    projected into multiple heads, each computing attention separately, and then
-    concatenated and linearly transformed back to the original dimension.
+    This module implements multihead attention mechanism where the input is
+    projected into multiple heads, each computing scaled dot product attention separately,
+    and then concatenated and linearly transformed back to the original dimension.
 
     The attention mechanism allows the model to focus on different positions of the input
     sequence when processing each position, enabling better context understanding.
@@ -37,19 +35,25 @@ class MultiHeadAttention(nn.Module):
             qkv_bias (bool, optional): Whether to include bias terms in the query, key, and
                 value linear transformations. Defaults to False.
 
-        Note:
-            Each head operates independently on the input, applying causal attention
-            within its own parameter space. The outputs from all heads are concatenated
-            along the feature dimension.
+        Raises:
+            AssertionError: If output_dim is not divisible by num_heads.
 
         """
         super().__init__()
-        self.heads = nn.ModuleList(
-            [
-                CausalAttention(input_dim, output_dim, context_length, dropout, qkv_bias)
-                for _ in range(num_heads)
-            ]
-        )
+        assert output_dim % num_heads == 0, "output_dim must be divisible by num_heads"
+
+        self.output_dim = output_dim
+        self.num_heads = num_heads
+        self.head_dim = output_dim // num_heads
+
+        self.W_query = nn.Linear(input_dim, output_dim, bias=qkv_bias)
+        self.W_key = nn.Linear(input_dim, output_dim, bias=qkv_bias)
+        self.W_value = nn.Linear(input_dim, output_dim, bias=qkv_bias)
+        self.out_proj = nn.Linear(output_dim, output_dim)
+        self.dropout = nn.Dropout(dropout)
+        self.mask: torch.Tensor = torch.triu(
+            torch.ones(context_length, context_length), diagonal=1
+        ).bool()
 
     def forward(self, x: torch.Tensor):
         """Compute multi head causal attention on the input tensor.
@@ -59,13 +63,44 @@ class MultiHeadAttention(nn.Module):
 
         Returns:
             torch.Tensor: Output tensor of shape
-                (batch_size, sequence_length, num_heads * output_dim).
-
-        Note:
-            Each attention head processes the input independently with causal masking,
-            and the results are concatenated along the feature dimension. This allows
-            the model to attend to different parts of the sequence while maintaining
-            causality (future tokens cannot influence past tokens).
+                (batch_size, sequence_length, output_dim).
 
         """
-        return torch.cat([head(x) for head in self.heads], dim=-1)
+        batch, num_tokens, input_dim = x.shape
+
+        keys = self.W_key(x)  # output shape (batch, num_tokens, output_dim)
+        queries = self.W_query(x)
+        values = self.W_value(x)
+
+        # We implicitly split the matrix by adding a `num_heads` dimension
+        # Unroll last dim:
+        # (batch, num_tokens, output_dim) -> (batch, num_tokens, num_heads, head_dim)
+        keys = keys.view(batch, num_tokens, self.num_heads, self.head_dim)
+        queries = queries.view(batch, num_tokens, self.num_heads, self.head_dim)
+        values = values.view(batch, num_tokens, self.num_heads, self.head_dim)
+
+        # Transpose
+        # (batch, num_tokens, num_heads, head_dim) -> (batch, num_heads, num_tokens, head_dimd)
+        keys = keys.transpose(1, 2)
+        queries = queries.transpose(1, 2)
+        values = values.transpose(1, 2)
+
+        # Scaled dot-product attention with causal mask
+        attn_scores = queries @ keys.transpose(2, 3)
+
+        # Original mask truncated to the number of tokens and converted to boolean
+        mask_bool = self.mask[:num_tokens, :num_tokens]
+
+        # Use the mask to fill attention scores
+        attn_scores.masked_fill_(mask_bool, -torch.inf)
+
+        attn_weights = torch.softmax(attn_scores / keys.shape[-1] ** 0.5, dim=-1)
+
+        # Shape (batch, num_tokens, num_heads, head_dim)
+        context_vec = (attn_weights @ values).transpose(1, 2)
+
+        # Combine heads, self.output_dim = self.num_heads * self.head_dim
+        context_vec = context_vec.contiguous().view(batch, num_tokens, self.output_dim)
+        context_vec = self.out_proj(context_vec)
+
+        return context_vec

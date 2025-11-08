@@ -5,19 +5,6 @@ import torch
 from llm.multi_head_attention import MultiHeadAttention
 
 
-def test_MultiHeadAttention_initilization():
-    """Test initialization of MultiHeadAttention."""
-    multi_head_attention = MultiHeadAttention(
-        input_dim=3,
-        output_dim=2,
-        context_length=8,
-        dropout=0.1,
-        num_heads=4,
-    )
-
-    assert len(multi_head_attention.heads) == 4
-
-
 def test_MultiHeadAttention_compute_context_vectors(
     token_ids: list[int], batch_embeddings: torch.Tensor
 ):
@@ -41,4 +28,4 @@ def test_MultiHeadAttention_compute_context_vectors(
     # token_ids are used in generating token_embeddings and
     # batch_embeddings are combination of two token_embeddings
     # they are available in conftest.py
-    assert context_vectors.shape == (2, len(token_ids), output_dim * len(batch_embeddings))
+    assert context_vectors.shape == (2, len(token_ids), output_dim)
