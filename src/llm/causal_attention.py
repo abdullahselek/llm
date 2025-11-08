@@ -1,9 +1,10 @@
 """Causal Attention Layer."""
 
 import torch
+import torch.nn as nn
 
 
-class CausalAttention(torch.nn.Module):
+class CausalAttention(nn.Module):
     """Causal Attention Layer.
 
     It prevents tokens from attending to future tokens in a sequence,
@@ -30,10 +31,10 @@ class CausalAttention(torch.nn.Module):
 
         """
         super().__init__()
-        self.W_query = torch.nn.Linear(input_dim, output_dim, bias=qkv_bias)
-        self.W_key = torch.nn.Linear(input_dim, output_dim, bias=qkv_bias)
-        self.W_value = torch.nn.Linear(input_dim, output_dim, bias=qkv_bias)
-        self.dropout = torch.nn.Dropout(dropout)
+        self.W_query = nn.Linear(input_dim, output_dim, bias=qkv_bias)
+        self.W_key = nn.Linear(input_dim, output_dim, bias=qkv_bias)
+        self.W_value = nn.Linear(input_dim, output_dim, bias=qkv_bias)
+        self.dropout = nn.Dropout(dropout)
         self.mask: torch.Tensor = torch.triu(
             torch.ones(context_length, context_length), diagonal=1
         ).bool()
