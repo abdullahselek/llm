@@ -3,6 +3,8 @@
 import re
 from pathlib import Path
 
+import yaml
+
 
 def create_vocab() -> dict:
     """Create vocablary dictionary.
@@ -23,3 +25,19 @@ def create_vocab() -> dict:
     vocab = {token: integer for integer, token in enumerate(all_words)}
 
     return vocab
+
+
+def read_config(cfg_path: str) -> dict:
+    """Load and read LLM configuration.
+
+    Args:
+        cfg_path (str): Configuration file path.
+
+    Returns:
+        Loaded config as dictionary.
+
+    """
+    with open(cfg_path) as f:
+        config = yaml.safe_load(f)
+
+    return config

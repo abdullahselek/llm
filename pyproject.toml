@@ -5,30 +5,29 @@ description = "LLM from scratch."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "matplotlib>=3.10.7",
-    "numpy>=2.3.4",
-    "polars>=1.35.1",
-    "psutil>=7.1.3",
-    "pyyaml>=6.0.3",
-    "tiktoken>=0.12.0",
-    "torch>=2.9.0",
-    "tqdm>=4.67.1",
+  "matplotlib>=3.10.7",
+  "numpy>=2.3.4",
+  "polars>=1.35.1",
+  "psutil>=7.1.3",
+  "pyyaml>=6.0.3",
+  "tiktoken>=0.12.0",
+  "torch>=2.9.0",
+  "tqdm>=4.67.1",
 ]
 
 [dependency-groups]
 dev = [
-    "mypy>=1.18.2",
-    "nox>=2025.10.16",
-    "pytest>=8.4.2",
-    "pytest-cov>=7.0.0",
-    "pytest-xdist>=3.8.0",
-    "ruff>=0.14.3",
+  "mypy>=1.18.2",
+  "nox>=2025.10.16",
+  "pytest>=8.4.2",
+  "pytest-cov>=7.0.0",
+  "pytest-xdist>=3.8.0",
+  "ruff>=0.14.3",
+  "types-pyyaml>=6.0.12.20250915",
 ]
 
 [tool.uv.sources]
-torch = [
-    { index = "pytorch" },
-]
+torch = [{ index = "pytorch" }]
 
 [[tool.uv.index]]
 name = "pytorch"
@@ -44,12 +43,12 @@ src = ["src"]
 target-version = "py313"
 line-length = 95
 lint.select = [
-    "D",   # pydocstyle
-    "E",   # pycodestyle errors
-    "F",   # pyflakes
-    "I",   # isort
-    "UP",  # pyupgrade
-    "W",   # pycodestyle warnings
+  "D",  # pydocstyle
+  "E",  # pycodestyle errors
+  "F",  # pyflakes
+  "I",  # isort
+  "UP", # pyupgrade
+  "W",  # pycodestyle warnings
 ]
 
 
