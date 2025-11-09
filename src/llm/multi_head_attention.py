@@ -47,16 +47,9 @@ class MultiHeadAttention(nn.Module):
         self.num_heads = num_heads
         self.head_dim = output_dim // num_heads
 
-        # self.W_query = nn.Linear(input_dim, output_dim, bias=qkv_bias)
-        # self.W_key = nn.Linear(input_dim, output_dim, bias=qkv_bias)
-        # self.W_value = nn.Linear(input_dim, output_dim, bias=qkv_bias)
         self.qkv = nn.Linear(input_dim, output_dim * 3, bias=qkv_bias)
         self.out_proj = nn.Linear(output_dim, output_dim)
         self.dropout = dropout
-        # self.dropout = nn.Dropout(dropout)
-        # self.mask: torch.Tensor = torch.triu(
-        #     torch.ones(context_length, context_length), diagonal=1
-        # ).bool()
 
     def forward(self, x: torch.Tensor):
         """Compute multi head causal attention on the input tensor.
@@ -69,45 +62,6 @@ class MultiHeadAttention(nn.Module):
                 (batch_size, sequence_length, output_dim).
 
         """
-        # batch, num_tokens, input_dim = x.shape
-        #
-        # keys = self.W_key(x)  # output shape (batch, num_tokens, output_dim)
-        # queries = self.W_query(x)
-        # values = self.W_value(x)
-        #
-        # # We implicitly split the matrix by adding a `num_heads` dimension
-        # # Unroll last dim:
-        # # (batch, num_tokens, output_dim) -> (batch, num_tokens, num_heads, head_dim)
-        # keys = keys.view(batch, num_tokens, self.num_heads, self.head_dim)
-        # queries = queries.view(batch, num_tokens, self.num_heads, self.head_dim)
-        # values = values.view(batch, num_tokens, self.num_heads, self.head_dim)
-        #
-        # Transpose
-        # (batch, num_tokens, num_heads, head_dim) -> (batch, num_heads, num_tokens, head_dimd)
-        # keys = keys.transpose(1, 2)
-        # queries = queries.transpose(1, 2)
-        # values = values.transpose(1, 2)
-        #
-        # # Scaled dot-product attention with causal mask
-        # attn_scores = queries @ keys.transpose(2, 3)
-        #
-        # # Original mask truncated to the number of tokens and converted to boolean
-        # mask_bool = self.mask[:num_tokens, :num_tokens]
-        #
-        # # Use the mask to fill attention scores
-        # attn_scores.masked_fill_(mask_bool, -torch.inf)
-        #
-        # attn_weights = torch.softmax(attn_scores / keys.shape[-1] ** 0.5, dim=-1)
-        #
-        # # Shape (batch, num_tokens, num_heads, head_dim)
-        # context_vec = (attn_weights @ values).transpose(1, 2)
-        #
-        # # Combine heads, self.output_dim = self.num_heads * self.head_dim
-        # context_vec = context_vec.contiguous().view(batch, num_tokens, self.output_dim)
-        # context_vec = self.out_proj(context_vec)
-        #
-        # return context_vec
-
         batch_size, num_tokens, embed_dim = x.shape
 
         # (batch_size, num_tokens, embed_dim) -> (batch_size, num_tokens, embed_dim * 3)
