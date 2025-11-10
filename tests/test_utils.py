@@ -20,7 +20,7 @@ def test_read_config():
 
     assert config["vocab_size"] == 50257
     assert config["context_length"] == 2048
-    assert config["embeddings_dim"] == 2560
+    assert config["embedding_dim"] == 2560
     assert config["n_heads"] == 32
     assert config["n_layers"] == 32
     assert config["drop_rate"] == 0.1
