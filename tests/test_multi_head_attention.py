@@ -51,6 +51,7 @@ def test_MultiHeadAttention_compute_context_vectors_when_KV_cache_enabled(
         max_seq_len=256,
         window_size=128,
     )
+    multi_head_attention.eval()
 
     context_vectors = multi_head_attention(batch_embeddings, use_cache=True)
 
@@ -58,6 +59,10 @@ def test_MultiHeadAttention_compute_context_vectors_when_KV_cache_enabled(
     # batch_embeddings are combination of two token_embeddings
     # they are available in conftest.py
     assert context_vectors.shape == (2, len(token_ids), output_dim)
+
+    context_vec = multi_head_attention(batch_embeddings, use_cache=True)
+
+    assert torch.equal(context_vec, context_vectors)
 
 
 def test_MultiHeadAttention_reset_cache(batch_embeddings: torch.Tensor):
