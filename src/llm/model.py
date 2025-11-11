@@ -70,3 +70,44 @@ class LLM(nn.Module):
         x = self.final_norm(x)
         logits = self.out_head(x)
         return logits
+
+
+def generate_text(
+    model: LLM, idx: torch.Tensor, max_new_tokens: int, context_size: int
+) -> torch.Tensor:
+    """Generate text using greedy decoding with the given model.
+
+    This function performs iterative text generation by repeatedly predicting the next token
+    and appending it to the input sequence until the maximum number of tokens is generated.
+
+    Args:
+        model (LLM): The trained language model to use for generation.
+        idx (torch.Tensor): Input tensor of token indices with shape
+            (batch_size, sequence_length).
+        max_new_tokens (int): Maximum number of new tokens to generate.
+        context_size (int): Maximum context length to maintain during generation.
+
+    Returns:
+        torch.Tensor: Generated text tensor with shape
+            (batch_size, original_length + max_new_tokens).
+
+    """
+    for _ in range(max_new_tokens):
+        # Crop current context if it exceeds context size
+        idx_cond = idx[:, -context_size:]
+
+        with torch.no_grad():
+            logits = model(idx_cond)
+
+        # (batch, n_token, vocab_size) ->  (batch_size, vocab_size)
+        logits = logits[:, -1, :]
+
+        # Get the idx of vocablary with highest logits value
+        # (batch, 1)
+        idx_next = torch.argmax(logits, dim=-1, keepdim=True)
+
+        # Append sampled index to the running sequence
+        # (batch, n_tokens+1)
+        idx = torch.cat((idx, idx_next), dim=1)
+
+    return idx
