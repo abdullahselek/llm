@@ -14,7 +14,7 @@ def test_create_vocab():
 
 def test_read_config():
     """Test loading and reading LLM config file."""
-    cfg_path = Path.cwd() / "src/llm/configs/llm_8b.yaml"
+    cfg_path = Path.cwd() / "src/llm/configs/llm_1.7b.yaml"
 
     config = read_config(cfg_path=cfg_path)
 
