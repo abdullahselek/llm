@@ -16,11 +16,12 @@ def test_LLM_forward_pass():
         "n_layers": 4,
         "drop_rate": 0.1,
         "qkv_bias": False,
+        "kv_window_size": 128,
     }
 
     model = LLM(config)
     x = torch.randint(0, 1024, (32, 64))  # batch_size=32, seq_len=64
-    logits = model(x)
+    logits = model(x, use_cache=True)
 
     assert logits.shape == torch.Size([32, 64, 1024])
 
@@ -35,6 +36,7 @@ def test_LLM_generate_text():
         "n_layers": 12,
         "drop_rate": 0.1,
         "qkv_bias": False,
+        "kv_window_size": 512,
     }
     torch.manual_seed(123)
     model = LLM(config)

@@ -34,14 +34,15 @@ class LLM(nn.Module):
         self.positional_emb = nn.Embedding(config["context_length"], config["embedding_dim"])
         self.dropout = nn.Dropout(config["drop_rate"])
 
-        self.transfomer_blocks = nn.Sequential(
-            *[
+        self.transfomer_blocks = nn.ModuleList(
+            [
                 TransformerBlock(
                     context_length=config["context_length"],
                     embedding_dim=config["embedding_dim"],
                     n_heads=config["n_heads"],
                     drop_rate=config["drop_rate"],
                     qkv_bias=config["qkv_bias"],
+                    window_size=config["kv_window_size"],
                 )
                 for _ in range(config["n_layers"])
             ]
@@ -49,13 +50,15 @@ class LLM(nn.Module):
 
         self.final_norm = LayerNorm(config["embedding_dim"])
         self.out_head = nn.Linear(config["embedding_dim"], config["vocab_size"], bias=False)
+        self.ptr_current_pos = 0
 
-    def forward(self, in_x: torch.Tensor) -> torch.Tensor:
+    def forward(self, in_x: torch.Tensor, use_cache: bool = False) -> torch.Tensor:
         """Forward pass through the language model.
 
         Args:
             in_x (torch.Tensor): Input tensor of token indices with shape
                 (batch_size, sequence_length).
+            use_cache (bool): Enable using KV cache. Defaults to False.
 
         Returns:
             torch.Tensor: Logits tensor with shape (batch_size, sequence_length, vocab_size)
@@ -63,10 +66,25 @@ class LLM(nn.Module):
         """
         batch_size, seq_len = in_x.shape
         token_embeds = self.token_emb(in_x)
-        pos_embeds = self.positional_emb(torch.arange(seq_len, device=in_x.device))
+
+        if use_cache:
+            pos_ids = torch.arange(
+                self.ptr_current_pos,
+                self.ptr_current_pos + seq_len,
+                device=in_x.device,
+                dtype=torch.long,
+            )
+            self.ptr_current_pos += seq_len
+        else:
+            pos_ids = torch.arange(0, seq_len, device=in_x.device, dtype=torch.long)
+
+        pos_embeds = self.positional_emb(pos_ids).unsqueeze(0)
         x = token_embeds + pos_embeds  # (batch_size, num_tokens, emb_size)
         x = self.dropout(x)
-        x = self.transfomer_blocks(x)
+
+        for trfmr_blk in self.transfomer_blocks:
+            x = trfmr_blk(x, use_cache=use_cache)
+
         x = self.final_norm(x)
         logits = self.out_head(x)
         return logits
