@@ -120,9 +120,11 @@ def generate_text(
         # (batch, n_token, vocab_size) ->  (batch_size, vocab_size)
         logits = logits[:, -1, :]
 
+        probas = torch.softmax(logits, dim=-1)
+
         # Get the idx of vocablary with highest logits value
         # (batch, 1)
-        idx_next = torch.argmax(logits, dim=-1, keepdim=True)
+        idx_next = torch.argmax(probas, dim=-1, keepdim=True)
 
         # Append sampled index to the running sequence
         # (batch, n_tokens+1)
