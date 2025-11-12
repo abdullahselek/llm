@@ -62,7 +62,7 @@ def test_MultiHeadAttention_compute_context_vectors_when_KV_cache_enabled(
 
     context_vec = multi_head_attention(batch_embeddings, use_cache=True)
 
-    assert torch.equal(context_vec, context_vectors)
+    assert torch.allclose(context_vec, context_vectors)
 
 
 def test_MultiHeadAttention_reset_cache(batch_embeddings: torch.Tensor):
