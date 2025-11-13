@@ -89,9 +89,19 @@ class LLM(nn.Module):
         logits = self.out_head(x)
         return logits
 
+    def reset_kv_cache(self):
+        """Reset key value of the attention blocks."""
+        for trf in self.transfomer_blocks:
+            trf.multi_head_attention.reset_cache()
+        self.ptr_current_pos = 0
+
 
 def generate_text(
-    model: LLM, idx: torch.Tensor, max_new_tokens: int, context_size: int
+    model: LLM,
+    idx: torch.Tensor,
+    max_new_tokens: int,
+    context_size: int,
+    use_cache: bool = True,
 ) -> torch.Tensor:
     """Generate text using greedy decoding with the given model.
 
