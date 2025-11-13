@@ -114,30 +114,32 @@ def generate_text(
             (batch_size, sequence_length).
         max_new_tokens (int): Maximum number of new tokens to generate.
         context_size (int): Maximum context length to maintain during generation.
+        use_cache (bool): Enables using cache. Defaults to True.
 
     Returns:
         torch.Tensor: Generated text tensor with shape
             (batch_size, original_length + max_new_tokens).
 
     """
-    for _ in range(max_new_tokens):
-        # Crop current context if it exceeds context size
-        idx_cond = idx[:, -context_size:]
+    model.eval()
+    ctx_len = context_size or model.positional_emb.num_embeddings
 
-        with torch.no_grad():
-            logits = model(idx_cond)
+    with torch.no_grad():
+        if use_cache:
+            model.reset_kv_cache()
+            logits = model(idx[:, -ctx_len:], use_cache=True)
 
-        # (batch, n_token, vocab_size) ->  (batch_size, vocab_size)
-        logits = logits[:, -1, :]
-
-        probas = torch.softmax(logits, dim=-1)
-
-        # Get the idx of vocablary with highest logits value
-        # (batch, 1)
-        idx_next = torch.argmax(probas, dim=-1, keepdim=True)
-
-        # Append sampled index to the running sequence
-        # (batch, n_tokens+1)
-        idx = torch.cat((idx, idx_next), dim=1)
+            for _ in range(max_new_tokens):
+                # Pick the token with the highest log-probability (greedy sampling)
+                next_idx = logits[:, -1].argmax(dim=-1, keepdim=True)
+                # Append it to the running sequence
+                idx = torch.cat([idx, next_idx], dim=1)
+                # Feed model only the new token
+                logits = model(next_idx, use_cache=True)
+        else:
+            for _ in range(max_new_tokens):
+                logits = model(idx[:, -ctx_len:], use_cache=False)
+                next_idx = logits[:, -1].argmax(dim=-1, keepdim=True)
+                idx = torch.cat([idx, next_idx], dim=1)
 
     return idx
