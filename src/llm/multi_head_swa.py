@@ -136,16 +136,16 @@ class MultiHeadAttentionWithSWA(nn.Module):
             q_start, q_start + num_tokens_Q, device=device, dtype=torch.long
         )
         k_positions = torch.arange(
-            k_start, k_start + num_tokens_Q, device=device, dtype=torch.long
+            k_start, k_start + num_tokens_K, device=device, dtype=torch.long
         )
 
         # Sliding window width
         W = (
-            num_tokens_K + 1
-            if self.sliding_window_size is None
-            else int(self.sliding_window_size)
+            self.sliding_window_size
+            if self.sliding_window_size is not None
+            else num_tokens_K + 1
         )
-        diff = q_positions.unsqueeze(-1) + k_positions.unsqueeze(0)
+        diff = q_positions.unsqueeze(-1) - k_positions.unsqueeze(0)
         mask_bool = (diff < 0) | (diff >= W)
         if use_cache:
             self.ptr_cur += num_tokens_Q
@@ -166,3 +166,8 @@ class MultiHeadAttentionWithSWA(nn.Module):
         context_vec = self.out_proj(context_vec)
 
         return context_vec
+
+    def reset_cache(self):
+        """Reset the KV cache to initial state."""
+        self.cached_keys, self.cached_values = None, None
+        self.ptr_cur = 0
