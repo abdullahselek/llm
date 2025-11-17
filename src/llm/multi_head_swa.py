@@ -11,6 +11,10 @@ class MultiHeadAttentionWithSWA(nn.Module):
     constraints to limit long range dependencies.
     """
 
+    cached_keys: torch.Tensor
+    cached_values: torch.Tensor
+    ptr_cur: int
+
     def __init__(
         self,
         input_dim: int,
@@ -50,13 +54,28 @@ class MultiHeadAttentionWithSWA(nn.Module):
         self.W_key = nn.Linear(input_dim, output_dim, bias=qkv_bias)
         self.W_value = nn.Linear(input_dim, output_dim, bias=qkv_bias)
         self.out_proj = nn.Linear(output_dim, output_dim)
-        self.dropout = dropout
+        self.dropout = nn.Dropout(dropout)
 
         self.register_buffer("cached_keys", None, persistent=False)
         self.register_buffer("cached_values", None, persistent=False)
         self.ptr_cur = 0
 
     def forward(self, x: torch.Tensor, use_cache: bool = False) -> torch.Tensor:
+        """Compute multi head attention with optional sliding window constraint.
+
+        When use_cache is True, the layer maintains internal cache of keys and values
+        for efficient incremental generation. The sliding window constraint is applied
+        based on the cached sequence length and current token positions.
+
+        Args:
+            x (torch.Tensor): Input tensor of shape (batch_size, num_tokens, emded_dim).
+            use_cache (bool, optional): If True, use cached keys and values for incremental
+                decoding. Defaults to False.
+
+        Returns:
+            torch.Tensor: Output tensor of shape (batch_size, num_tokens, output_dim).
+
+        """
         batch_size, num_tokens, emded_dim = x.shape
 
         # Shape (batch_size, num_tokens, output_dim)
@@ -72,8 +91,8 @@ class MultiHeadAttentionWithSWA(nn.Module):
 
         if use_cache:
             old_len = 0 if self.cached_keys is None else self.cached_keys.size(1)
-            if self.cached_keys is None:
-                self.cached_keys, self.cached_value = keys_new, values_new
+            if self.cached_keys is None and self.cached_values is None:
+                self.cached_keys, self.cached_values = keys_new, values_new
             else:
                 self.cached_keys = torch.cat([self.cached_keys, keys_new], dim=1)
                 self.cached_values = torch.cat([self.cached_values, values_new], dim=1)
@@ -86,7 +105,7 @@ class MultiHeadAttentionWithSWA(nn.Module):
 
             # Compute absolue start positions for mask
             total_len = old_len + num_tokens
-            k_len_now = self.cached_keys(1)
+            k_len_now = self.cached_keys.size(1)
             dropped = max(0, total_len - k_len_now)
             k_start_pos_abs = (self.ptr_cur - old_len) + dropped
             q_start_pos_abs = self.ptr_cur
