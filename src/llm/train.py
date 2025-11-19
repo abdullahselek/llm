@@ -13,4 +13,3 @@ dataset = load_dataset(
     split="train",
     token=os.getenv("HF_TOKEN"),
 )
-print(f"dataset: {dataset}")
