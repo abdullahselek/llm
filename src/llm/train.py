@@ -8,6 +8,25 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+def split_dataset(dataset: Dataset) -> tuple[Dataset, Dataset]:
+    """Split dataset into training and validation sets.
+
+    Args:
+        dataset (Dataset): HF Dataset object.
+
+    Returns:
+        Training and validation sets.
+
+    """
+    total_size = len(dataset)
+    split_point = int(0.8 * total_size)
+
+    train_dataset = dataset.select(range(split_point))
+    val_dataset = dataset.select(range(split_point, total_size))
+
+    return train_dataset, val_dataset
+
+
 def process_dataset(dataset: Dataset) -> list[dict[str, str]]:
     """Preproces HF codestart dataset.
 
