@@ -1,7 +1,7 @@
 """Tests for dataset module."""
 
 from llm.bpe_tokenizer import BPETokenizer
-from llm.dataset import GPTDataset, create_dataloader
+from llm.dataset import GPTDataset, LLMDataset, create_dataloader
 
 
 def test_GPTDataset_loading_items(vocab_text: str):
@@ -33,3 +33,24 @@ def test_create_dataloader(vocab_text: str):
 
     assert len(first_batch[0][0]) == 256
     assert len(first_batch[0][-1]) == 256
+
+
+def test_LLMDataset_loading_items(vocab_text: str):
+    """Test LLMDataset initilization and loading items after encoding."""
+    tokenizer = BPETokenizer()
+    dataset = LLMDataset(
+        texts=[vocab_text, vocab_text], tokenizer=tokenizer, max_length=256, stride=128
+    )
+
+    assert len(dataset) == 78
+
+
+def test_LLMDataset_getitem_at_index(vocab_text: str):
+    """Test getting item from dataset after loading and encoding items."""
+    tokenizer = BPETokenizer()
+    dataset = LLMDataset(
+        texts=[vocab_text, vocab_text], tokenizer=tokenizer, max_length=256, stride=128
+    )
+    item = dataset[0]
+
+    assert len(item) == 2
