@@ -63,3 +63,7 @@ python_version = "3.13"
 [[tool.mypy.overrides]]
 module = "llm.multi_head_attention.*"
 disable_error_code = ["has-type"]
+
+[[tool.mypy.overrides]]
+module = "datasets.*"
+ignore_missing_imports = true
