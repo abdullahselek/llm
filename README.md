@@ -1,6 +1,6 @@
-# LLM from scratch
+# LLM Code
 
-Designing and building a Large Language Model from scratch, in progress.
+Designing and building a Large Language Model from scratch specifically for code generation.
 
 ## Requirements
 
