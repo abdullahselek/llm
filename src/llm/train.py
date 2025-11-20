@@ -6,8 +6,10 @@ import sys
 import time
 from pathlib import Path
 
+import torch
 from datasets import Dataset, load_dataset
 from dotenv import load_dotenv
+from torch.utils.data import DataLoader
 
 from llm.dataset import create_llm_dataloader
 from llm.model import LLM
@@ -57,6 +59,72 @@ def process_dataset(dataset: Dataset) -> list[str]:
     for i in range(dataset.num_rows):
         code_contents.append(dataset[i]["content"])
     return code_contents
+
+
+def train_one_epoch(
+    model: LLM,
+    dataloader: DataLoader,
+    optimizer: torch.optim.Optimizer,
+    device: torch.device,
+    epoch: int,
+) -> float:
+    """Train model for one epoch.
+
+    Args:
+        model (LLM): Model object.
+        dataloader (DataLoader): Torch dataloader object.
+        optimizer (torch.optim.Optimizer): Torch optimizer.
+        device (torch.device): Torch device.
+        epoch (int): Epoch number.
+
+    Returns:
+        Loss value.
+
+    """
+    model.train()
+    total_loss = 0.0
+    num_batches = 0
+
+    for batch_idx, (input_ids, target_ids) in enumerate(dataloader):
+        input_ids = input_ids.to(device)
+        target_ids = target_ids.to(device)
+
+        # Forward pass
+        outputs = model(input_ids, labels=target_ids)
+        loss = outputs.loss
+
+        # Backward pass
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        total_loss += loss.item()
+        num_batches += 1
+
+        if batch_idx % 100 == 0:
+            log.info(f"Epoch {epoch}, Batch {batch_idx}, Loss: {loss.item():.4f}")
+
+    return total_loss / num_batches
+
+
+def validate(model: LLM, dataloader: DataLoader, device: torch.device) -> float:
+    """Validate model performance."""
+    model.eval()
+    total_loss = 0.0
+    num_batches = 0
+
+    with torch.no_grad():
+        for input_ids, target_ids in dataloader:
+            input_ids = input_ids.to(device)
+            target_ids = target_ids.to(device)
+
+            outputs = model(input_ids, labels=target_ids)
+            loss = outputs.loss
+
+            total_loss += loss.item()
+            num_batches += 1
+
+    return total_loss / num_batches
 
 
 if __name__ == "__main__":
