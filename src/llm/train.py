@@ -1,11 +1,14 @@
 """Model training module."""
 
 import os
+from pathlib import Path
 
 from datasets import Dataset, load_dataset
 from dotenv import load_dotenv
 
 from llm.dataset import create_llm_dataloader
+from llm.model import LLM
+from llm.utils import read_config
 
 load_dotenv()
 
@@ -74,3 +77,8 @@ if __name__ == "__main__":
         drop_last=True,
         num_workers=4,
     )
+
+    cfg_path = Path.cwd() / "src/llm/configs/llm_1.7b.yaml"
+    config = read_config(cfg_path)
+
+    model = LLM(config=config)
