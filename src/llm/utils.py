@@ -27,11 +27,11 @@ def create_vocab() -> dict:
     return vocab
 
 
-def read_config(cfg_path: str) -> dict:
+def read_config(cfg_path: str | Path) -> dict:
     """Load and read LLM configuration.
 
     Args:
-        cfg_path (str): Configuration file path.
+        cfg_path (str | Path): Configuration file path.
 
     Returns:
         Loaded config as dictionary.
