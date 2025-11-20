@@ -39,7 +39,7 @@ def process_dataset(dataset: Dataset) -> list[dict[str, str]]:
     """
     code_contents = []
     for i in range(dataset.num_rows):
-        code_contents.append({"text": dataset[i]["content"]})
+        code_contents.append(dataset[i]["content"])
     return code_contents
 
 
@@ -51,4 +51,5 @@ if __name__ == "__main__":
         token=os.getenv("HF_TOKEN"),
     )
 
-    processed_data = process_dataset(dataset)
+    train_dataset, val_dataset = split_dataset(dataset)
+    train_dataset, val_dataset = process_dataset(dataset)
