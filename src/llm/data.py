@@ -37,7 +37,7 @@ def get_input_embeddings(
         List of sum of token and positional embeddings creates the final input representation.
 
     """
-    vocab_size = 50257
+    vocab_size = 200019
     log.info(f"Vocablary size: {vocab_size}")
 
     token_embedding_layer = nn.Embedding(vocab_size, output_dim)

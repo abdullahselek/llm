@@ -9,7 +9,7 @@ def test_GPTDataset_loading_items(vocab_text: str):
     tokenizer = BPETokenizer()
     dataset = GPTDataset(text=vocab_text, tokenizer=tokenizer, max_length=256, stride=128)
 
-    assert len(dataset) == 39
+    assert len(dataset) == 36
 
 
 def test_GPTDataset_getitem_at_index(vocab_text: str):
@@ -42,7 +42,7 @@ def test_LLMDataset_loading_items(vocab_text: str):
         texts=[vocab_text, vocab_text], tokenizer=tokenizer, max_length=256, stride=128
     )
 
-    assert len(dataset) == 78
+    assert len(dataset) == 72
 
 
 def test_LLMDataset_getitem_at_index(vocab_text: str):
