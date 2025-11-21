@@ -9,7 +9,7 @@ class BPETokenizer:
     def __init__(self):
         """Initialize."""
         self.tokenizer = tiktoken.get_encoding("o200k_base")
-        print(f"Vocabulary size: {self.tokenizer.n_vocab}")
+        self.eos_token_id = self.tokenizer.eot_token
 
     def encode(self, text: str) -> list[int]:
         """Encode given text and return tokens.
