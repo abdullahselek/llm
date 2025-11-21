@@ -169,11 +169,12 @@ def main():
     start_time = time.perf_counter()
 
     try:
+        max_length, stride = 512, 256
         train_dataloader = create_llm_dataloader(
             texts=train_data,
             batch_size=4,
-            max_length=2048,
-            stride=1024,
+            max_length=max_length,
+            stride=stride,
             shuffle=True,
             drop_last=True,
             num_workers=4,
@@ -182,8 +183,8 @@ def main():
         val_dataloader = create_llm_dataloader(
             texts=val_data,
             batch_size=4,
-            max_length=2048,
-            stride=1024,
+            max_length=max_length,
+            stride=stride,
             shuffle=False,
             drop_last=True,
             num_workers=4,
@@ -225,7 +226,7 @@ def main():
         log.error(f"Failed to initialize optimizer: {e}")
         return
 
-    num_epochs = 100
+    num_epochs = 3
     best_val_loss = float("inf")
 
     log.info("Starting training...")
