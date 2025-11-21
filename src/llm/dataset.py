@@ -145,7 +145,6 @@ def create_llm_dataloader(
     drop_last: bool = True,
     num_workers: int = 0,
     pin_memory: bool = False,
-    prefetch_factor: int = 2,
     persistent_workers: bool = False,
 ) -> DataLoader:
     """Create a DataLoader for GPTDataset.
@@ -160,8 +159,6 @@ def create_llm_dataloader(
         num_workers (int): Number of subprocesses to load the data, default 0.
         pin_memory (bool): If True, the data loader will copy Tensors into device/CUDA
             pinned memory before returning them. Defaults to False.
-        prefetch_factor (int): Number of batches loaded in advance by each worker.
-            Defaults to 2.
         persistent_workers (bool): If True, the data loader will not shut down the worker
             processes after a dataset has been consumed once. This allows to maintain the
             workers Dataset instances alive. Defaults to False.
@@ -181,6 +178,5 @@ def create_llm_dataloader(
         drop_last=drop_last,
         num_workers=num_workers,
         pin_memory=pin_memory,
-        prefetch_factor=prefetch_factor,
         persistent_workers=persistent_workers,
     )

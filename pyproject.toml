@@ -65,7 +65,7 @@ module = "llm.multi_head_attention.*"
 disable_error_code = ["has-type"]
 
 [[tool.mypy.overrides]]
-module = "datasets.*"
+module = ["datasets.*", "tqdm.*"]
 ignore_missing_imports = true
 
 

@@ -10,6 +10,7 @@ import torch
 from datasets import Dataset, load_dataset
 from dotenv import load_dotenv
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 from llm.dataset import create_llm_dataloader
 from llm.model import LLM
@@ -113,6 +114,7 @@ def validate(model: LLM, dataloader: DataLoader, device: torch.device) -> float:
     total_loss = 0.0
     num_batches = 0
 
+    progress_bar = tqdm(dataloader, desc="Validation")
     with torch.no_grad():
         for input_ids, target_ids in dataloader:
             input_ids = input_ids.to(device)
@@ -123,6 +125,8 @@ def validate(model: LLM, dataloader: DataLoader, device: torch.device) -> float:
 
             total_loss += loss.item()
             num_batches += 1
+
+            progress_bar.set_postfix({"Loss": f"{loss.item():.4f}"})
 
     return total_loss / num_batches
 
@@ -170,9 +174,8 @@ def main():
 
     try:
         max_length, stride = 128, 64
-        batch_size, num_workers = 2, 0
+        batch_size, num_workers = 2, 2
         pin_memory = False
-        prefetch_factor = 2
 
         train_dataloader = create_llm_dataloader(
             texts=train_data,
@@ -183,7 +186,6 @@ def main():
             drop_last=True,
             num_workers=num_workers,
             pin_memory=pin_memory,
-            prefetch_factor=prefetch_factor,
         )
 
         val_dataloader = create_llm_dataloader(
@@ -195,7 +197,6 @@ def main():
             drop_last=True,
             num_workers=num_workers,
             pin_memory=pin_memory,
-            prefetch_factor=prefetch_factor,
         )
 
         log.info("Data loaders created successfully")
@@ -238,6 +239,7 @@ def main():
     best_val_loss = float("inf")
 
     log.info("Starting training...")
+    epoch_pbar = tqdm(range(num_epochs), desc="Training Epochs")
     for epoch in range(num_epochs):
         log.info(f"Starting epoch {epoch + 1}/{num_epochs}")
 
@@ -256,6 +258,7 @@ def main():
             log.info(f"Best model saved to {model_save_path}")
 
         scheduler.step()
+        epoch_pbar.set_postfix({"Val Loss": f"{val_loss:.4f}"})
 
     log.info("Training completed successfully!")
 
