@@ -62,15 +62,35 @@ class LLMDataset(Dataset):
 
         for text in texts:
             token_ids = tokenizer.encode(text)
-            assert len(token_ids) > max_length, (
-                "Number of tokenized inputs must at least be equal to max_length+1"
-            )
+            # If text is shorter than max_length, can still use it
+            # by creating a single chunk
+            if len(token_ids) <= max_length:
+                # Create a single chunk with padding if needed
+                input_chunk = token_ids[:max_length]
+                target_chunk = token_ids[1 : max_length + 1]
 
-            for i in range(0, len(token_ids) - max_length, stride):
-                input_chunk = token_ids[i : i + max_length]
-                target_chunk = token_ids[i + 1 : i + max_length + 1]
+                # Pad if necessary
+                if len(input_chunk) < max_length:
+                    input_chunk.extend(
+                        [tokenizer.eos_token_id] * (max_length - len(input_chunk))
+                    )
+                if len(target_chunk) < max_length:
+                    target_chunk.extend(
+                        [tokenizer.eos_token_id] * (max_length - len(target_chunk))
+                    )
+
                 self.input_ids.append(torch.tensor(input_chunk))
                 self.target_ids.append(torch.tensor(target_chunk))
+            else:
+                # Normal chunking for longer texts
+                for i in range(0, len(token_ids) - max_length, stride):
+                    input_chunk = token_ids[i : i + max_length]
+                    target_chunk = token_ids[i + 1 : i + max_length + 1]
+
+                    # Ensure we have exactly max_length tokens
+                    if len(input_chunk) == max_length and len(target_chunk) == max_length:
+                        self.input_ids.append(torch.tensor(input_chunk))
+                        self.target_ids.append(torch.tensor(target_chunk))
 
     def __len__(self) -> int:
         """Length of dataset."""
