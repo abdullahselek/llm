@@ -169,25 +169,26 @@ def main():
     start_time = time.perf_counter()
 
     try:
-        max_length, stride = 512, 256
+        max_length, stride = 256, 128
+        batch_size, num_workers = 2, 2
         train_dataloader = create_llm_dataloader(
             texts=train_data,
-            batch_size=4,
+            batch_size=batch_size,
             max_length=max_length,
             stride=stride,
             shuffle=True,
             drop_last=True,
-            num_workers=4,
+            num_workers=num_workers,
         )
 
         val_dataloader = create_llm_dataloader(
             texts=val_data,
-            batch_size=4,
+            batch_size=batch_size,
             max_length=max_length,
             stride=stride,
             shuffle=False,
             drop_last=True,
-            num_workers=4,
+            num_workers=num_workers,
         )
 
         log.info("Data loaders created successfully")
