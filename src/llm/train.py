@@ -174,7 +174,7 @@ def main():
 
     try:
         max_length, stride = 128, 64
-        batch_size, num_workers = 2, 2
+        batch_size, num_workers = 1, 0
         pin_memory = False
 
         train_dataloader = create_llm_dataloader(
