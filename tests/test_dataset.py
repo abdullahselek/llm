@@ -1,7 +1,17 @@
 """Tests for dataset module."""
 
+import torch
+
 from llm.bpe_tokenizer import BPETokenizer
-from llm.dataset import GPTDataset, LLMDataset, create_dataloader, create_llm_dataloader
+from llm.dataset import (
+    GPTDataset,
+    IterableLLMDataset,
+    LLMDataset,
+    create_dataloader,
+    create_llm_dataloader,
+    create_llm_dataloader_from_dataset,
+)
+from tests.mocks import MockHFDataset
 
 
 def test_GPTDataset_loading_items(vocab_text: str):
@@ -70,3 +80,37 @@ def test_create_llm_dataloader(vocab_text: str):
 
     assert len(first_batch[0][0]) == 256
     assert len(first_batch[0][-1]) == 256
+
+
+def test_IterableLLMDataset_padding(mock_hf_dataset: MockHFDataset):
+    """Test if short texts are correctly padded with EOS tokens."""
+    tokenizer = BPETokenizer()
+    dataset = IterableLLMDataset(
+        dataset=mock_hf_dataset, tokenizer=tokenizer, max_length=5, stride=2
+    )
+
+    iterator = iter(dataset)
+    input_ids, target_ids = next(iterator)
+
+    assert len(input_ids) == 5
+    assert len(target_ids) == 5
+
+    expected_input = torch.Tensor([16, 220, 17, 220, 18])
+
+    assert torch.equal(input_ids, expected_input)
+
+
+def test_IterableLLMDataset_with_dataloader(mock_hf_dataset: MockHFDataset):
+    """Test if it works with actual PyTorch DataLoader."""
+    tokenizer = BPETokenizer()
+    dataset = IterableLLMDataset(
+        dataset=mock_hf_dataset, tokenizer=tokenizer, max_length=5, stride=2
+    )
+
+    data_loader = create_llm_dataloader_from_dataset(dataset, batch_size=2, shuffle=False)
+
+    batch = next(iter(data_loader))
+    input_batch, target_batch = batch
+
+    assert input_batch.shape == (2, 5)
+    assert target_batch.shape == (2, 5)

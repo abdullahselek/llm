@@ -7,6 +7,7 @@ import torch
 
 from llm.bpe_tokenizer import BPETokenizer
 from llm.utils import create_vocab
+from tests.mocks import MockHFDataset
 
 
 @pytest.fixture()
@@ -53,3 +54,13 @@ def batch_embeddings(token_embeddings: torch.Tensor) -> torch.Tensor:
     """Fixture of batch token embeddings."""
     batch = torch.stack((token_embeddings, token_embeddings), dim=0)
     return batch
+
+
+@pytest.fixture()
+def mock_hf_dataset() -> MockHFDataset:
+    """Return Mock HuggingFace Dataset object."""
+    raw_data = [
+        {"content": "1 2 3"},
+        {"content": "1 2 3 4 5 6 7 8"},
+    ]
+    return MockHFDataset(raw_data)
