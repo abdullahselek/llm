@@ -14,11 +14,11 @@ def test_create_vocab():
 
 def test_read_config():
     """Test loading and reading LLM config file."""
-    cfg_path = Path.cwd() / "src/llm/configs/llm_1.7b.yaml"
+    cfg_path = Path.cwd() / "src/llm/configs/llm_3.55b.yaml"
 
     config = read_config(cfg_path=cfg_path)
 
-    assert config["vocab_size"] == 50257
+    assert config["vocab_size"] == 200019
     assert config["context_length"] == 2048
     assert config["embedding_dim"] == 2560
     assert config["n_heads"] == 32
