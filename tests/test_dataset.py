@@ -100,14 +100,11 @@ def test_IterableLLMDataset_padding(mock_hf_dataset: MockHFDataset):
     assert torch.equal(input_ids, expected_input)
 
 
-def test_IterableLLMDataset_with_dataloader(mock_hf_dataset: MockHFDataset):
-    """Test if it works with actual PyTorch DataLoader."""
-    tokenizer = BPETokenizer()
-    dataset = IterableLLMDataset(
-        dataset=mock_hf_dataset, tokenizer=tokenizer, max_length=5, stride=2
+def test_create_llm_dataloader_from_dataset(mock_hf_dataset: MockHFDataset):
+    """Test if it works with actual DataLoader."""
+    data_loader = create_llm_dataloader_from_dataset(
+        mock_hf_dataset, batch_size=2, max_length=5, stride=2, shuffle=False
     )
-
-    data_loader = create_llm_dataloader_from_dataset(dataset, batch_size=2, shuffle=False)
 
     batch = next(iter(data_loader))
     input_batch, target_batch = batch
