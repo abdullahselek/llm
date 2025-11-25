@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from llm.dataset import create_llm_dataloader
+from llm.dataset import create_llm_dataloader_from_dataset
 from llm.model import LLM
 from llm.utils import read_config
 
@@ -37,11 +37,15 @@ def split_dataset(dataset: Dataset) -> tuple[Dataset, Dataset]:
         Training and validation sets.
 
     """
-    total_size = len(dataset)
-    split_point = int(0.8 * total_size)
+    # total_size = len(dataset)
+    # split_point = int(0.8 * total_size)
+    #
+    # train_dataset = dataset.select(range(split_point))
+    # val_dataset = dataset.select(range(split_point, total_size))
 
-    train_dataset = dataset.select(range(split_point))
-    val_dataset = dataset.select(range(split_point, total_size))
+    dataset = dataset.train_test_split(test_size=0.2, seed=42)
+    train_dataset = dataset["train"]
+    val_dataset = dataset["test"]
 
     return train_dataset, val_dataset
 
@@ -159,8 +163,9 @@ def main():
 
     try:
         train_dataset, val_dataset = split_dataset(dataset)
-        train_data, val_data = process_dataset(train_dataset), process_dataset(val_dataset)
-        log.info(f"Training samples: {len(train_data)}, Validation samples: {len(val_data)}")
+        log.info(
+            f"Training samples: {len(train_dataset)}, Validation samples: {len(val_dataset)}"
+        )
     except Exception as e:
         log.error(f"Failed to process dataset: {e}")
         return
@@ -174,29 +179,24 @@ def main():
 
     try:
         max_length, stride = 128, 64
-        batch_size, num_workers = 1, 0
-        pin_memory = False
+        batch_size, num_workers = 8, 2
 
-        train_dataloader = create_llm_dataloader(
-            texts=train_data,
+        train_dataloader = create_llm_dataloader_from_dataset(
+            dataset=train_dataset,
             batch_size=batch_size,
             max_length=max_length,
             stride=stride,
             shuffle=True,
-            drop_last=True,
             num_workers=num_workers,
-            pin_memory=pin_memory,
         )
 
-        val_dataloader = create_llm_dataloader(
-            texts=val_data,
+        val_dataloader = create_llm_dataloader_from_dataset(
+            dataset=val_dataset,
             batch_size=batch_size,
             max_length=max_length,
             stride=stride,
             shuffle=False,
-            drop_last=True,
             num_workers=num_workers,
-            pin_memory=pin_memory,
         )
 
         log.info("Data loaders created successfully")
