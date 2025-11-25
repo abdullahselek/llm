@@ -21,7 +21,7 @@ def test_LLM_forward_pass():
 
     model = LLM(config)
     x = torch.randint(0, 1024, (32, 64))  # batch_size=32, seq_len=64
-    logits = model(x, use_cache=True)
+    logits = model(x, use_cache=True).logits
 
     assert logits.shape == torch.Size([32, 64, 1024])
 

@@ -1,10 +1,20 @@
 """Large Langauge Model."""
 
+from dataclasses import dataclass
+
 import torch
 import torch.nn as nn
 
 from llm.layer_norm import LayerNorm
 from llm.transformer_block import TransformerBlock
+
+
+@dataclass
+class LLMOutput:
+    """Data class for LLM outputs."""
+
+    logits: torch.Tensor
+    loss: torch.Tensor | None = None
 
 
 class LLM(nn.Module):
@@ -52,16 +62,26 @@ class LLM(nn.Module):
         self.out_head = nn.Linear(config["embedding_dim"], config["vocab_size"], bias=False)
         self.ptr_current_pos = 0
 
-    def forward(self, in_x: torch.Tensor, use_cache: bool = False) -> torch.Tensor:
+        self.criterion = nn.CrossEntropyLoss()
+
+    def forward(
+        self,
+        in_x: torch.Tensor,
+        labels: torch.Tensor | None = None,
+        use_cache: bool = False,
+    ) -> LLMOutput:
         """Forward pass through the language model.
 
         Args:
             in_x (torch.Tensor): Input tensor of token indices with shape
                 (batch_size, sequence_length).
+            labels (torch.Tensor): Target tokens (batch_size, sequence_length).
+                Defaults to None.
             use_cache (bool): Enable using KV cache. Defaults to False.
 
         Returns:
-            torch.Tensor: Logits tensor with shape (batch_size, sequence_length, vocab_size)
+            LLM: Logits tensor with shape (batch_size, sequence_length, vocab_size)
+                and loss value.
 
         """
         batch_size, seq_len = in_x.shape
@@ -87,7 +107,15 @@ class LLM(nn.Module):
 
         x = self.final_norm(x)
         logits = self.out_head(x)
-        return logits
+
+        loss = None
+        if labels is not None:
+            # Flatten logits to [batch * seq_len, vocab_size]
+            # Flatten labels to [batch * seq_len]
+            # This is standard requirement for CrossEntropyLoss in PyTorch
+            loss = self.criterion(logits.view(-1, logits.size(-1)), labels.view(-1))
+
+        return LLMOutput(logits=logits, loss=loss)
 
     def reset_kv_cache(self):
         """Reset key value of the attention blocks."""
@@ -127,7 +155,7 @@ def generate_text(
     with torch.no_grad():
         if use_cache:
             model.reset_kv_cache()
-            logits = model(idx[:, -ctx_len:], use_cache=True)
+            logits = model(idx[:, -ctx_len:], use_cache=True).logits
 
             for _ in range(max_new_tokens):
                 # Pick the token with the highest log-probability (greedy sampling)
@@ -135,10 +163,10 @@ def generate_text(
                 # Append it to the running sequence
                 idx = torch.cat([idx, next_idx], dim=1)
                 # Feed model only the new token
-                logits = model(next_idx, use_cache=True)
+                logits = model(next_idx, use_cache=True).logits
         else:
             for _ in range(max_new_tokens):
-                logits = model(idx[:, -ctx_len:], use_cache=False)
+                logits = model(idx[:, -ctx_len:], use_cache=False).logits
                 next_idx = logits[:, -1].argmax(dim=-1, keepdim=True)
                 idx = torch.cat([idx, next_idx], dim=1)
 
