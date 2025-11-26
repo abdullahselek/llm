@@ -202,7 +202,7 @@ def main():
     elapsed_time = end_time - start_time
     log.info(f"Data loaders loaded in {elapsed_time:.2f} seconds.")
 
-    cfg_path = Path.cwd() / "src/llm/configs/llm_1.7b.yaml"
+    cfg_path = Path.cwd() / "src/llm/configs/llm_3.55b.yaml"
 
     try:
         config = read_config(cfg_path)
