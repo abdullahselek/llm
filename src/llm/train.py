@@ -37,12 +37,6 @@ def split_dataset(dataset: Dataset) -> tuple[Dataset, Dataset]:
         Training and validation sets.
 
     """
-    # total_size = len(dataset)
-    # split_point = int(0.8 * total_size)
-    #
-    # train_dataset = dataset.select(range(split_point))
-    # val_dataset = dataset.select(range(split_point, total_size))
-
     dataset = dataset.train_test_split(test_size=0.2, seed=42)
     train_dataset = dataset["train"]
     val_dataset = dataset["test"]
