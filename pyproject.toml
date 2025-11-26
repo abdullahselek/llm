@@ -68,6 +68,8 @@ disable_error_code = ["has-type"]
 module = ["datasets.*", "tqdm.*"]
 ignore_missing_imports = true
 
-
 [tool.coverage.run]
 omit = ["src/llm/train.py"]
+
+[project.scripts]
+train-llm = "llm.train:main"
