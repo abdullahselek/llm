@@ -24,3 +24,13 @@ Task that runs the unit tests:
 ```bash
 uv run nox -s run_tests
 ```
+
+## Training the model
+
+The LLM uses an open source [dataset](https://huggingface.co/datasets/bigcode/starcoderdata) from HuggingFace, for now training script only loads Python specific code from the dataset.
+
+Model configs are available at `src/llm/configs`. To start a new training simply run
+
+```bash
+uv run train-llm
+```
