@@ -1,5 +1,6 @@
 """Model training module."""
 
+import argparse
 import logging
 import os
 import sys
@@ -131,6 +132,20 @@ def validate(model: LLM, dataloader: DataLoader, device: torch.device) -> float:
 
 def main():
     """Train and validate model."""
+    parser = argparse.ArgumentParser(description="Trigger an LLM training.")
+
+    cfg_path = Path.cwd() / "src/llm/configs/llm_3.55b.yaml"
+    parser.add_argument(
+        "--config-path", type=Path, help="Path of LLM config", default=cfg_path
+    )
+    parser.add_argument(
+        "--data-percentage", type=int, help="Use the first X% of data.", default=5
+    )
+
+    args = parser.parse_args()
+
+    cfg_path, data_percentage = args.config_path, args.data_percentage
+
     log.info("Starting training process...")
 
     log.info("Dataset is going to be downloaded...")
@@ -140,7 +155,7 @@ def main():
         dataset = load_dataset(
             "bigcode/starcoderdata",
             data_dir="python",
-            split="train",
+            split=f"train[:{data_percentage}%]",
             token=os.getenv("HF_TOKEN"),
         )
         log.info(f"Dataset loaded successfully with {len(dataset)} samples")
