@@ -32,5 +32,5 @@ The LLM uses an open source [dataset](https://huggingface.co/datasets/bigcode/st
 Model configs are available at `src/llm/configs`. To start a new training with 3.55b model config simply run
 
 ```bash
-uv run train-llm
+uv run train-llm --config-path ./src/llm/configs/llm_3.55b.yaml --data-percentage 10
 ```
