@@ -195,7 +195,7 @@ def main():
 
     try:
         max_length, stride = 128, 64
-        batch_size, num_workers = 8, 2
+        batch_size, num_workers = 24, 16
 
         train_dataloader = create_llm_dataloader_from_dataset(
             dataset=train_dataset,
