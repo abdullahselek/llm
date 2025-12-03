@@ -266,7 +266,7 @@ def main():
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             # Save model checkpoint
-            model_save_path = Path.cwd() / "models" / f"best_model_epoch_{epoch + 1}.pt"
+            model_save_path = Path.cwd() / "models" / f"llm_epoch_{epoch + 1}.pt"
             model_save_path.parent.mkdir(parents=True, exist_ok=True)
             torch.save(model.state_dict(), str(model_save_path))
             log.info(f"Best model saved to {model_save_path}")
