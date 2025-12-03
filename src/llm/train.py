@@ -108,7 +108,14 @@ def train_one_epoch(
 
 
 def validate(model: LLM, dataloader: DataLoader, device: torch.device) -> float:
-    """Validate model performance."""
+    """Validate model performance.
+
+    Args:
+        model (LLM): Instance of LLM.
+        dataloader (DataLoader): Validation dataloader.
+        device (torch.device): Torch device.
+
+    """
     model.eval()
     total_loss = 0.0
     num_batches = 0
