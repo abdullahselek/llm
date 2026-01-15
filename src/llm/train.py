@@ -165,7 +165,7 @@ def main():
             split=f"train[:{data_percentage}%]",
             token=os.getenv("HF_TOKEN"),
         )
-        dataset = dataset.select(range(20000))
+        dataset = dataset.select(range(10000))
         log.info(f"Dataset loaded successfully with {len(dataset)} samples")
     except Exception as e:
         log.error(f"Failed to load dataset: {e}")
